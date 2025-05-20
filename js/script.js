@@ -5,14 +5,14 @@ let listaDeseos = [];
 
 // Productos en el catálogo (simulado)
 const productos = [
-    { id: 1, nombre: "Smartphone Pro 2025", precio: 999, categoria: "Electrónica", imagen: "/api/placeholder/300/300", descuento: 20, precioOriginal: 1299 },
-    { id: 2, nombre: "Smartwatch Premium", precio: 425, categoria: "Tecnología", imagen: "/api/placeholder/300/300", descuento: 15, precioOriginal: 499 },
-    { id: 3, nombre: "Auriculares Inalámbricos", precio: 199, categoria: "Audio", imagen: "/api/placeholder/300/300", descuento: 0, precioOriginal: 199 },
-    { id: 4, nombre: "Tablet Pro 11\"", precio: 525, categoria: "Tecnología", imagen: "/api/placeholder/300/300", descuento: 30, precioOriginal: 749 },
-    { id: 5, nombre: "Laptop UltraSlim 15.6\"", precio: 1299, categoria: "Computación", imagen: "/api/placeholder/300/300", descuento: 0, precioOriginal: 1299 },
+    { id: 1, nombre: "IPhone 16 Pro Max", precio: 999, categoria: "Electrónica", imagen: "/api/placeholder/300/300", descuento: 20, precioOriginal: 1299 },
+    { id: 2, nombre: "Apple Watch Series 10", precio: 425, categoria: "Tecnología", imagen: "/api/placeholder/300/300", descuento: 15, precioOriginal: 499 },
+    { id: 3, nombre: "Auriculares Logitech G733", precio: 199, categoria: "Audio", imagen: "/api/placeholder/300/300", descuento: 0, precioOriginal: 199 },
+    { id: 4, nombre: "Volante De Carreras Y Pedales Logitech G G923", precio: 525, categoria: "Tecnología", imagen: "/api/placeholder/300/300", descuento: 30, precioOriginal: 749 },
+    { id: 5, nombre: "Notebook Gamer Msi Katana 17 B13vek I7 16gb, 512gb Rtx 4050", precio: 1299, categoria: "Computación", imagen: "/api/placeholder/300/300", descuento: 0, precioOriginal: 1299 },
     { id: 6, nombre: "Cafetera Express Automática", precio: 349, categoria: "Electrodomésticos", imagen: "/api/placeholder/300/300", descuento: 0, precioOriginal: 349 },
-    { id: 7, nombre: "Smart TV 55\" 4K UHD", precio: 799, categoria: "Televisores", imagen: "/api/placeholder/300/300", descuento: 0, precioOriginal: 799 },
-    { id: 8, nombre: "Zapatillas Deportivas Pro", precio: 129, categoria: "Calzado", imagen: "/api/placeholder/300/300", descuento: 0, precioOriginal: 129 }
+    { id: 7, nombre: "Tv Led LG 70 Uhd Smart 4k", precio: 799, categoria: "Televisores", imagen: "/api/placeholder/300/300", descuento: 0, precioOriginal: 799 },
+    { id: 8, nombre: "Zapatillas Deportivas adidas", precio: 129, categoria: "Calzado", imagen: "/api/placeholder/300/300", descuento: 0, precioOriginal: 129 }
 ];
 
 // Categorías disponibles
