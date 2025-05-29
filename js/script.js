@@ -9,9 +9,9 @@ const productos = [
     { id: 2, nombre: "Apple Watch Series 10", precio: 425, categoria: "Tecnología", imagen: "./img/applewatch.webp", descuento: 15, precioOriginal: 499 },
     { id: 3, nombre: "Auriculares Logitech G733", precio: 199, categoria: "Audio", imagen: "./img/g733.webp", descuento: 0, precioOriginal: 199 },
     { id: 4, nombre: "Volante De Carreras Y Pedales Logitech G G923", precio: 525, categoria: "Tecnología", imagen: "./img/g923.webp", descuento: 30, precioOriginal: 749 },
-    { id: 5, nombre: "Notebook Gamer Msi Katana 17 B13vek I7 16gb, 512gb Rtx 4050", precio: 1299, categoria: "Computación", imagen: "./img/laptopGamer.webp", descuento: 0, precioOriginal: 1299 },
+    { id: 5, nombre: "Notebook Gamer Msi Katana 17 B13vek I7 16gb, 512gb Rtx 4050", precio: 2299, categoria: "Computación", imagen: "./img/laptopGamer.webp", descuento: 0, precioOriginal: 2299 },
     { id: 6, nombre: "Cafetera Express Automática", precio: 349, categoria: "Electrodomésticos", imagen: "./img/cafetera-automatica.webp", descuento: 0, precioOriginal: 349 },
-    { id: 7, nombre: "Tv Led LG 70 Uhd Smart 4k", precio: 799, categoria: "Televisores", imagen: "./img/tv.webp", descuento: 0, precioOriginal: 799 },
+    { id: 7, nombre: "Tv Led LG 70 Uhd Smart 4k", precio: 1799, categoria: "Televisores", imagen: "./img/tv.webp", descuento: 0, precioOriginal: 1799 },
     { id: 8, nombre: "Zapatillas Deportivas adidas", precio: 129, categoria: "Calzado", imagen: "./img/zapatillas.webp", descuento: 0, precioOriginal: 129 }
 ];
 
