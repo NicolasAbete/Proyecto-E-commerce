@@ -3,17 +3,10 @@
 let carrito = [];
 let listaDeseos = [];
 
-// Productos en el catálogo (simulado)
-const productos = [
-    { id: 1, nombre: "IPhone 16 Pro Max", precio: 999, categoria: "Electrónica", imagen: "./img/iphone16.webp", descuento: 20, precioOriginal: 1299 },
-    { id: 2, nombre: "Apple Watch Series 10", precio: 425, categoria: "Tecnología", imagen: "./img/applewatch.webp", descuento: 15, precioOriginal: 499 },
-    { id: 3, nombre: "Auriculares Logitech G733", precio: 199, categoria: "Audio", imagen: "./img/g733.webp", descuento: 0, precioOriginal: 199 },
-    { id: 4, nombre: "Volante De Carreras Y Pedales Logitech G G923", precio: 525, categoria: "Tecnología", imagen: "./img/g923.webp", descuento: 30, precioOriginal: 749 },
-    { id: 5, nombre: "Notebook Gamer Msi Katana 17 B13vek I7 16gb, 512gb Rtx 4050", precio: 2299, categoria: "Computación", imagen: "./img/laptopGamer.webp", descuento: 0, precioOriginal: 2299 },
-    { id: 6, nombre: "Cafetera Express Automática", precio: 349, categoria: "Electrodomésticos", imagen: "./img/cafetera-automatica.webp", descuento: 0, precioOriginal: 349 },
-    { id: 7, nombre: "Tv Led LG 70 Uhd Smart 4k", precio: 1799, categoria: "Televisores", imagen: "./img/tv.webp", descuento: 0, precioOriginal: 1799 },
-    { id: 8, nombre: "Zapatillas Deportivas adidas", precio: 129, categoria: "Calzado", imagen: "./img/zapatillas.webp", descuento: 0, precioOriginal: 129 }
-];
+// Productos en el catálogo (se cargarán desde JSON)
+let productos = [];
+
+
 
 // Categorías disponibles
 const categorias = [
@@ -30,9 +23,58 @@ let emptyCartMessage;
 let cartSubtotal;
 let cartFooter;
 
+// ==================== FUNCIÓN PARA CARGAR PRODUCTOS DESDE JSON ====================
+async function cargarProductosDesdeJSON() {
+    try {
+        const response = await fetch('./json/productos.json');
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const productosData = await response.json();
+        productos = productosData;
+        console.log("Productos cargados exitosamente:", productos.length);
+        
+        // Después de cargar los productos, generar el HTML si es necesario
+        generarProductosHTML();
+        
+    } catch (error) {
+        console.error("Error al cargar productos:", error);
+        // Fallback: usar productos por defecto si falla la carga
+        usarProductosPorDefecto();
+    }
+}
+
+// Función fallback con todos los productos del HTML
+function usarProductosPorDefecto() {
+    productos = [
+        { id: 1, nombre: "IPhone 16 Pro Max", precio: 999, categoria: "Electrónica", imagen: "./img/iphone16.webp", descuento: 20, precioOriginal: 1299 },
+        { id: 2, nombre: "Apple Watch Series 10", precio: 425, categoria: "Tecnología", imagen: "./img/applewatch.webp", descuento: 15, precioOriginal: 499 },
+        { id: 3, nombre: "Auriculares Logitech G733", precio: 199, categoria: "Audio", imagen: "./img/g733.webp" },
+        { id: 4, nombre: "Volante De Carreras Y Pedales Logitech G G923", precio: 525, categoria: "Tecnología", imagen: "./img/g923.webp", descuento: 30, precioOriginal: 749 },
+        { id: 5, nombre: "Notebook Gamer Msi Katana 17 B13vek I7 16gb, 512gb Rtx 4050", precio: 2299, categoria: "Computación", imagen: "./img/laptopGamer.webp" },
+        { id: 6, nombre: "Cafetera Express Automática", precio: 349, categoria: "Electrodomésticos", imagen: "./img/cafetera-automatica.webp" },
+        { id: 7, nombre: "Tv Led LG 70 Uhd Smart 4k", precio: 1799, categoria: "Televisores", imagen: "./img/tv.webp" },
+        { id: 8, nombre: "Zapatillas Deportivas adidas", precio: 129, categoria: "Calzado", imagen: "./img/zapatillas.webp" }
+    ];
+    console.log("Usando productos por defecto");
+    generarProductosHTML();
+}
+// Función para generar HTML dinámicamente (opcional)
+function generarProductosHTML() {
+    // Esta función sería útil si quieres generar las tarjetas de productos dinámicamente
+    // Por ahora, los productos ya están en tu HTML, así que no es necesaria
+    console.log("Productos listos para usar");
+}
+
+
 // ==================== EJECUCIÓN CUANDO EL DOM ESTÁ CARGADO ====================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log("Documento cargado completamente");
+    
+    // Cargar productos desde JSON primero
+    await cargarProductosDesdeJSON();
     
     // Inicializar componentes
     cargarCarritoDesdeStorage();
@@ -110,6 +152,8 @@ function inicializarBackToTop() {
         });
     }
 }
+
+
 
 // ==================== FUNCIONES LISTA DE DESEOS ====================
 function agregarAListaDeseos(event) {
@@ -224,7 +268,6 @@ function agregarAlCarrito(event) {
     // Obtener el producto desde el elemento clickeado
     const productoCard = event.target.closest('.product-card');
     const productoNombre = productoCard.querySelector('.product-title').textContent;
-    const productoPrecio = parseFloat(productoCard.querySelector('.current-price').textContent.replace('$', ''));
     
     // Buscar el producto en el array de productos
     const producto = productos.find(p => p.nombre === productoNombre);
@@ -238,11 +281,11 @@ function agregarAlCarrito(event) {
             carrito[index].cantidad++;
             console.log(`Cantidad de ${productoNombre} actualizada: ${carrito[index].cantidad}`);
         } else {
-            // Agregar nuevo producto
+            // Agregar nuevo producto usando el precio del objeto producto
             carrito.push({
                 id: producto.id,
                 nombre: productoNombre,
-                precio: productoPrecio,
+                precio: producto.precio, // Usar precio del objeto producto, no del DOM
                 cantidad: 1
             });
             console.log(`Producto agregado: ${productoNombre}`);
@@ -259,6 +302,9 @@ function agregarAlCarrito(event) {
         
         // Mostrar mensaje
         mostrarMensaje(`¡${productoNombre} agregado al carrito!`);
+    } else {
+        console.error('Producto no encontrado en el array de productos');
+        mostrarMensaje('Error al agregar el producto', 'error');
     }
 }
 

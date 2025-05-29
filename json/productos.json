@@ -1,0 +1,64 @@
+[
+    {
+        "id": 1,
+        "nombre": "IPhone 16 Pro Max",
+        "precio": 999,
+        "categoria": "Electrónica",
+        "imagen": "./img/iphone16.webp",
+        "descuento": 20,
+        "precioOriginal": 1299
+    },
+    {
+        "id": 2,
+        "nombre": "Apple Watch Series 10",
+        "precio": 425,
+        "categoria": "Tecnología",
+        "imagen": "./img/applewatch.webp",
+        "descuento": 15,
+        "precioOriginal": 499
+    },
+    {
+        "id": 3,
+        "nombre": "Auriculares Logitech G733",
+        "precio": 199,
+        "categoria": "Audio",
+        "imagen": "./img/g733.webp"
+    },
+    {
+        "id": 4,
+        "nombre": "Volante De Carreras Y Pedales Logitech G G923",
+        "precio": 525,
+        "categoria": "Tecnología",
+        "imagen": "./img/g923.webp",
+        "descuento": 30,
+        "precioOriginal": 749
+    },
+    {
+        "id": 5,
+        "nombre": "Notebook Gamer Msi Katana 17 B13vek I7 16gb, 512gb Rtx 4050",
+        "precio": 2299,
+        "categoria": "Computación",
+        "imagen": "./img/laptopGamer.webp"
+    },
+    {
+        "id": 6,
+        "nombre": "Cafetera Express Automática",
+        "precio": 349,
+        "categoria": "Electrodomésticos",
+        "imagen": "./img/cafetera-automatica.webp"
+    },
+    {
+        "id": 7,
+        "nombre": "Tv Led LG 70 Uhd Smart 4k",
+        "precio": 1799,
+        "categoria": "Televisores",
+        "imagen": "./img/tv.webp"
+    },
+    {
+        "id": 8,
+        "nombre": "Zapatillas Deportivas adidas",
+        "precio": 129,
+        "categoria": "Calzado",
+        "imagen": "./img/zapatillas.webp"
+    }
+]
