@@ -1,0 +1,23 @@
+{
+  "name": "proyectoe-commerce",
+  "version": "1.0.0",
+  "description": "mi simulador de ecommerce",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NicolasAbete/Proyecto-E-commerce.git"
+  },
+  "author": "Nicolas Abete",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NicolasAbete/Proyecto-E-commerce/issues"
+  },
+  "homepage": "https://github.com/NicolasAbete/Proyecto-E-commerce#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
