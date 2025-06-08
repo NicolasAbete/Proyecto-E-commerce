@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Mostrar el botón Back to Top cuando se desplaza
     inicializarBackToTop();
+    
 });
 
 // ==================== FUNCIONES DE INICIALIZACIÓN ====================
@@ -114,6 +115,7 @@ function inicializarEventos() {
     
     // Inicializar el carrito modal
     inicializarCarritoModal();
+    inicializarCheckoutModal();
 }
 
 function mostrarBienvenida() {
@@ -653,3 +655,255 @@ function mostrarMensaje(texto, tipo = 'success') {
         }, 500);
     }, 3000);
 }
+
+// Variables para el checkout modal
+let checkoutModal;
+let checkoutModalOverlay;
+
+// Función para inicializar el checkout modal (agregar después de inicializarCarritoModal)
+function inicializarCheckoutModal() {
+    checkoutModalOverlay = document.getElementById('checkoutModal');
+    
+    if (!checkoutModalOverlay) {
+        console.error("No se encontró el elemento #checkoutModal");
+        return;
+    }
+    
+    checkoutModal = checkoutModalOverlay.querySelector('.checkout-modal');
+    
+    // Botones de control del checkout
+    const closeCheckoutBtn = checkoutModalOverlay.querySelector('.checkout-close-btn');
+    const backToCartBtn = document.getElementById('backToCartBtn');
+    const confirmOrderBtn = document.getElementById('confirmOrderBtn');
+    const checkoutForm = document.getElementById('checkoutForm');
+    
+    // Eventos para cerrar el modal
+    if (closeCheckoutBtn) closeCheckoutBtn.addEventListener('click', cerrarCheckout);
+    if (backToCartBtn) backToCartBtn.addEventListener('click', volverAlCarrito);
+    if (confirmOrderBtn) confirmOrderBtn.addEventListener('click', confirmarPedido);
+    
+    // Cerrar al hacer clic fuera del modal
+    checkoutModalOverlay.addEventListener('click', (e) => {
+        if (e.target === checkoutModalOverlay) {
+            cerrarCheckout();
+        }
+    });
+    
+    // Manejar cambios en métodos de pago
+    const paymentMethods = document.querySelectorAll('input[name="metodoPago"]');
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', manejarCambioMetodoPago);
+    });
+    
+    // Formatear campos de tarjeta
+    const numeroTarjeta = document.getElementById('numeroTarjeta');
+    const fechaVencimiento = document.getElementById('fechaVencimiento');
+    const cvv = document.getElementById('cvv');
+    
+    if (numeroTarjeta) {
+        numeroTarjeta.addEventListener('input', formatearNumeroTarjeta);
+    }
+    
+    if (fechaVencimiento) {
+        fechaVencimiento.addEventListener('input', formatearFechaVencimiento);
+    }
+    
+    if (cvv) {
+        cvv.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    }
+    
+    console.log("Checkout modal inicializado correctamente");
+}
+
+// Modificar la función procesarCompra existente
+function procesarCompra() {
+    if (carrito.length === 0) return;
+    
+    // Cerrar el carrito y abrir el checkout
+    cerrarCarrito();
+    setTimeout(() => {
+        mostrarCheckout();
+    }, 300);
+}
+
+// Función para mostrar el checkout
+function mostrarCheckout() {
+    if (!checkoutModalOverlay) {
+        console.error("checkoutModalOverlay no está disponible");
+        return;
+    }
+    
+    // Mostrar el overlay del checkout
+    checkoutModalOverlay.style.display = 'block';
+    
+    // Pequeño timeout para permitir la transición CSS
+    setTimeout(() => {
+        checkoutModal.classList.add('active');
+    }, 10);
+    
+    // Actualizar el contenido del checkout
+    actualizarResumenPedido();
+}
+
+// Función para cerrar el checkout
+function cerrarCheckout() {
+    if (!checkoutModal || !checkoutModalOverlay) {
+        console.error("checkoutModal o checkoutModalOverlay no están disponibles");
+        return;
+    }
+    
+    checkoutModal.classList.remove('active');
+    
+    // Esperar a que termine la animación para ocultar el overlay
+    setTimeout(() => {
+        checkoutModalOverlay.style.display = 'none';
+    }, 300);
+}
+
+// Función para volver al carrito
+function volverAlCarrito() {
+    cerrarCheckout();
+    setTimeout(() => {
+        mostrarCarrito();
+    }, 300);
+}
+
+// Función para actualizar el resumen del pedido
+function actualizarResumenPedido() {
+    const orderSummary = document.getElementById('orderSummary');
+    const checkoutSubtotal = document.getElementById('checkoutSubtotal');
+    const checkoutTotal = document.getElementById('checkoutTotal');
+    
+    if (!orderSummary || !checkoutSubtotal || !checkoutTotal) {
+        console.error("Elementos del resumen no disponibles");
+        return;
+    }
+    
+    // Limpiar el resumen
+    orderSummary.innerHTML = '';
+    
+    let subtotal = 0;
+    
+    // Generar items del pedido
+    carrito.forEach(item => {
+        const productoInfo = productos.find(p => p.id === item.id);
+        const itemSubtotal = item.precio * item.cantidad;
+        subtotal += itemSubtotal;
+        
+        const orderItem = document.createElement('div');
+        orderItem.className = 'order-item';
+        orderItem.innerHTML = `
+            <div class="order-item-info">
+                <div class="order-item-name">${item.nombre}</div>
+                <div class="order-item-quantity">Cantidad: ${item.cantidad}</div>
+            </div>
+            <div class="order-item-price">$${itemSubtotal.toFixed(2)}</div>
+        `;
+        
+        orderSummary.appendChild(orderItem);
+    });
+    
+    // Actualizar totales
+    checkoutSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+    checkoutTotal.textContent = `$${subtotal.toFixed(2)}`;
+}
+
+// Función para manejar cambio de método de pago
+function manejarCambioMetodoPago(event) {
+    const cardDetails = document.getElementById('cardDetails');
+    const numeroTarjeta = document.getElementById('numeroTarjeta');
+    const fechaVencimiento = document.getElementById('fechaVencimiento');
+    const cvv = document.getElementById('cvv');
+    const nombreTarjeta = document.getElementById('nombreTarjeta');
+    
+    if (event.target.value === 'tarjeta') {
+        cardDetails.classList.remove('hidden');
+        cardDetails.style.display = 'block';
+        // Hacer campos requeridos
+        numeroTarjeta.required = true;
+        fechaVencimiento.required = true;
+        cvv.required = true;
+        nombreTarjeta.required = true;
+    } else {
+        cardDetails.classList.add('hidden');
+        cardDetails.style.display = 'none';
+        // Remover campos requeridos
+        numeroTarjeta.required = false;
+        fechaVencimiento.required = false;
+        cvv.required = false;
+        nombreTarjeta.required = false;
+    }
+}
+
+// Función para formatear número de tarjeta
+function formatearNumeroTarjeta(e) {
+    let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+    let formattedValue = value.replace(/(.{4})/g, '$1 ');
+    if (formattedValue.endsWith(' ')) {
+        formattedValue = formattedValue.slice(0, -1);
+    }
+    e.target.value = formattedValue;
+}
+
+// Función para formatear fecha de vencimiento
+function formatearFechaVencimiento(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    e.target.value = value;
+}
+
+// Función para confirmar el pedido
+function confirmarPedido(event) {
+    event.preventDefault();
+    
+    const form = document.getElementById('checkoutForm');
+    
+    // Validar formulario
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    // Recopilar datos del formulario
+    const formData = new FormData(form);
+    const datosCompra = {};
+    
+    for (let [key, value] of formData.entries()) {
+        datosCompra[key] = value;
+    }
+    
+    // Agregar información del carrito
+    datosCompra.productos = carrito;
+    datosCompra.total = carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0);
+    datosCompra.fecha = new Date().toISOString();
+    
+    // Simular procesamiento del pedido
+    console.log('Datos de la compra:', datosCompra);
+    
+    // Mostrar confirmación
+    alert(`¡Pedido confirmado! 
+    
+Método de pago: ${datosCompra.metodoPago}
+Total: $${datosCompra.total.toFixed(2)}
+    
+Recibirás un email de confirmación en: ${datosCompra.email}
+Tu pedido será enviado a: ${datosCompra.direccion}, ${datosCompra.ciudad}, ${datosCompra.provincia}`);
+    
+    // Limpiar carrito después de la compra exitosa
+    carrito = [];
+    guardarCarritoEnStorage();
+    actualizarContadorCarrito();
+    
+    // Cerrar modal
+    cerrarCheckout();
+    
+    // Opcional: Guardar la compra en localStorage para historial
+    const comprasAnteriores = JSON.parse(localStorage.getItem('historialCompras') || '[]');
+    comprasAnteriores.push(datosCompra);
+    localStorage.setItem('historialCompras', JSON.stringify(comprasAnteriores));
+}
+
