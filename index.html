@@ -6,6 +6,12 @@
     <title>FreshMarket - Tu mercado online</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos para la página de éxito -->
+    <link rel="stylesheet" href="estilos/success.css">
+
+    <!-- JavaScript para el servicio de email -->
+    <script src="js/emailService.js"></script>
+    <script src="js/checkout.js"></script>
     <link rel="stylesheet" href="./estilos/style.css">
 </head>
 <body>
@@ -688,7 +694,7 @@
                     <h4><i class="fas fa-shipping-fast"></i> Información de Envío</h4>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="nombre">Nombre completo *</label>
+                            <label id="clientName" for="nombre">Nombre completo *</label>
                             <input type="text" id="nombre" name="nombre" required>
                         </div>
                         <div class="form-group">
@@ -830,7 +836,12 @@
         </div>
     </div>
 </div>
-<div id="root"></div>
+
+
+<div id="main-container">
+    <!-- Aquí se mostrará la página de éxito -->
+</div>
+
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

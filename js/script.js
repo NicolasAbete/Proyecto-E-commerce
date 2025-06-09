@@ -525,17 +525,12 @@ function vaciarCarrito() {
 function procesarCompra() {
     if (carrito.length === 0) return;
     
-    // Aquí iría la lógica para procesar la compra
-    // Por ahora, solo mostramos un mensaje
-    alert('¡Gracias por tu compra! Serás redirigido al proceso de pago.');
-    
-    // Opcional: Vaciar el carrito después de la compra
-    carrito = [];
-    guardarCarritoEnStorage();
-    actualizarContadorCarrito();
+    // Cerrar el carrito y abrir el checkout
     cerrarCarrito();
+    setTimeout(() => {
+        mostrarCheckout();
+    }, 300);
 }
-
 // ==================== FUNCIONES PARA FORMULARIOS ====================
 function suscribirNewsletter(event) {
     event.preventDefault();
@@ -717,16 +712,6 @@ function inicializarCheckoutModal() {
     console.log("Checkout modal inicializado correctamente");
 }
 
-// Modificar la función procesarCompra existente
-function procesarCompra() {
-    if (carrito.length === 0) return;
-    
-    // Cerrar el carrito y abrir el checkout
-    cerrarCarrito();
-    setTimeout(() => {
-        mostrarCheckout();
-    }, 300);
-}
 
 // Función para mostrar el checkout
 function mostrarCheckout() {
@@ -857,6 +842,8 @@ function formatearFechaVencimiento(e) {
 }
 
 // Función para confirmar el pedido
+
+
 function confirmarPedido(event) {
     event.preventDefault();
     
@@ -876,22 +863,26 @@ function confirmarPedido(event) {
         datosCompra[key] = value;
     }
     
-    // Agregar información del carrito
-    datosCompra.productos = carrito;
-    datosCompra.total = carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0);
-    datosCompra.fecha = new Date().toISOString();
+    // Estructurar datos para el email service
+    const orderDataForEmail = {
+        customer: {
+            name: datosCompra.nombre || datosCompra.clientName || "Cliente",
+            email: datosCompra.email || "cliente@email.com"
+        },
+        items: carrito.map(item => ({
+            id: item.id,
+            name: item.nombre,
+            cantidad: item.cantidad,
+            precio: item.precio
+        })),
+        total: carrito.reduce((total, item) => total + (item.precio * item.cantidad), 0),
+        fecha: new Date().toISOString()
+    };
     
-    // Simular procesamiento del pedido
-    console.log('Datos de la compra:', datosCompra);
+    console.log('Datos de la compra:', orderDataForEmail);
     
-    // Mostrar confirmación
-    alert(`¡Pedido confirmado! 
-    
-Método de pago: ${datosCompra.metodoPago}
-Total: $${datosCompra.total.toFixed(2)}
-    
-Recibirás un email de confirmación en: ${datosCompra.email}
-Tu pedido será enviado a: ${datosCompra.direccion}, ${datosCompra.ciudad}, ${datosCompra.provincia}`);
+    // Llamar a onPaymentSuccess con los datos estructurados
+    onPaymentSuccess(orderDataForEmail);
     
     // Limpiar carrito después de la compra exitosa
     carrito = [];
@@ -901,9 +892,39 @@ Tu pedido será enviado a: ${datosCompra.direccion}, ${datosCompra.ciudad}, ${da
     // Cerrar modal
     cerrarCheckout();
     
-    // Opcional: Guardar la compra en localStorage para historial
+    // Guardar en historial
     const comprasAnteriores = JSON.parse(localStorage.getItem('historialCompras') || '[]');
-    comprasAnteriores.push(datosCompra);
+    comprasAnteriores.push(orderDataForEmail);
     localStorage.setItem('historialCompras', JSON.stringify(comprasAnteriores));
 }
 
+function onPaymentComplete() {
+    const orderData = {
+    customer: {
+      name: "Juan Pérez",  // Del formulario
+      email: "juan@email.com"  // Del formulario
+    },
+    items: [
+        { name: "Producto 1", quantity: 2, price: 50 }
+    ],
+    total: 100
+    };
+
+  // Esto mostrará la página de éxito y enviará el email
+    onPaymentSuccess(orderData);
+}
+
+// Cerrar al hacer clic en el overlay
+document.querySelector('.checkout-success').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.remove();
+    }
+});
+
+// Cerrar con Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.querySelector('.checkout-success');
+        if (modal) modal.remove();
+    }
+});
