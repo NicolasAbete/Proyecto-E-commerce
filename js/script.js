@@ -928,3 +928,563 @@ document.addEventListener('keydown', function(e) {
         if (modal) modal.remove();
     }
 });
+
+
+// ==================== CONFIGURACIÓN WHATSAPP ====================
+// Número de WhatsApp de la tienda (con código de país, sin + ni espacios)
+// Declaramos como const y la asignamos inmediatamente
+const WHATSAPP_CONFIG = {
+    number: "5492604206747", // Tu número actual
+    businessName: "FRESHMARKET"
+};
+
+// ==================== FUNCIÓN PRINCIPAL PARA MANEJAR PEDIDO EXITOSO ====================
+function onPaymentSuccess(orderData) {
+    console.log('Procesando pedido exitoso:', orderData);
+    
+    // Validar que tenemos los datos necesarios
+    if (!orderData || !orderData.customer || !orderData.items) {
+        console.error('Datos del pedido incompletos:', orderData);
+        return;
+    }
+    
+    // Mostrar notificación de éxito primero
+    mostrarNotificacionExito(orderData);
+    
+    // Después de 2 segundos, mostrar opción de WhatsApp
+    setTimeout(() => {
+        mostrarOpcionWhatsApp(orderData);
+    }, 2000);
+}
+
+// ==================== FUNCIÓN PARA MOSTRAR NOTIFICACIÓN DE ÉXITO ====================
+function mostrarNotificacionExito(orderData) {
+    // Remover notificación existente si hay alguna
+    const existingNotification = document.querySelector('.success-notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
+    // Crear modal de éxito
+    const successModal = document.createElement('div');
+    successModal.className = 'success-notification';
+    successModal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        animation: fadeInSuccess 0.3s ease;
+    `;
+    
+    successModal.innerHTML = `
+        <div class="success-content" style="
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            animation: slideInSuccess 0.4s ease;
+        ">
+            <div style="color: #4CAF50; font-size: 80px; margin-bottom: 20px;">✅</div>
+            <h2 style="color: #333; margin-bottom: 15px; font-size: 28px;">¡Pedido Exitoso!</h2>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
+                <h4 style="color: #333; margin-bottom: 15px; text-align: center;">Resumen del Pedido</h4>
+                <p><strong>Cliente:</strong> ${orderData.customer.name || 'N/A'}</p>
+                <p><strong>Email:</strong> ${orderData.customer.email || 'N/A'}</p>
+                <p><strong>Total:</strong> $${(orderData.total || 0).toFixed(2)}</p>
+                
+                <div style="margin-top: 15px;">
+                    <strong>Productos:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        ${orderData.items.map(item => 
+                            `<li>${item.name || 'Producto'} (${item.cantidad || 1}x) - $${((item.precio || 0) * (item.cantidad || 1)).toFixed(2)}</li>`
+                        ).join('')}
+                    </ul>
+                </div>
+            </div>
+            
+            <p style="color: #666; margin-bottom: 25px; font-size: 16px;">
+                Tu pedido ha sido procesado correctamente.<br>
+                Te contactaremos pronto para confirmar los detalles.
+            </p>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button onclick="cerrarNotificacionExito()" style="
+                    background: #6c757d;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    transition: all 0.3s;
+                " onmouseover="this.style.background='#545b62'" onmouseout="this.style.background='#6c757d'">
+                    Continuar Comprando
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Agregar estilos de animación si no existen
+    if (!document.querySelector('#success-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'success-styles';
+        styles.textContent = `
+            @keyframes fadeInSuccess {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            @keyframes slideInSuccess {
+                from { transform: translateY(-50px) scale(0.9); opacity: 0; }
+                to { transform: translateY(0) scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    document.body.appendChild(successModal);
+}
+
+// ==================== FUNCIÓN PARA CERRAR NOTIFICACIÓN DE ÉXITO ====================
+function cerrarNotificacionExito() {
+    const notification = document.querySelector('.success-notification');
+    if (notification) {
+        notification.style.animation = 'fadeInSuccess 0.3s ease reverse';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }
+}
+
+// ==================== FUNCIÓN PARA MOSTRAR OPCIÓN DE WHATSAPP ====================
+function mostrarOpcionWhatsApp(orderData) {
+    // Remover modal existente si hay alguno
+    const existingModal = document.querySelector('.whatsapp-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Crear modal de WhatsApp
+    const whatsappModal = document.createElement('div');
+    whatsappModal.className = 'whatsapp-modal';
+    whatsappModal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10001;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    whatsappModal.innerHTML = `
+        <div class="whatsapp-content" style="
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            max-width: 550px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            animation: slideInWhatsApp 0.4s ease;
+        ">
+            <div style="color: #25D366; font-size: 70px; margin-bottom: 20px;">📱</div>
+            <h2 style="color: #333; margin-bottom: 15px; font-size: 26px;">¿Confirmar por WhatsApp?</h2>
+            
+            <p style="color: #666; margin-bottom: 25px; font-size: 16px; line-height: 1.5;">
+                Te ayudamos a confirmar tu pedido enviándolo directamente a nuestro WhatsApp.<br>
+                <strong>¡Es rápido y seguro!</strong>
+            </p>
+            
+            <div style="background: #f0f8f0; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #25D366;">
+                <h4 style="color: #25D366; margin-bottom: 10px;">✅ Ventajas:</h4>
+                <ul style="text-align: left; color: #555; line-height: 1.6; margin: 0; padding-left: 20px;">
+                    <li>Confirmación inmediata del pedido</li>
+                    <li>Seguimiento en tiempo real</li>
+                    <li>Resolución rápida de dudas</li>
+                    <li>Atención personalizada</li>
+                </ul>
+            </div>
+            
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 25px;">
+                <button onclick="enviarPedidoPorWhatsApp()" class="btn-whatsapp-send" style="
+                    background: linear-gradient(135deg, #25D366, #128C7E);
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    border-radius: 30px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: bold;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 10px;
+                    transition: all 0.3s;
+                    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(37, 211, 102, 0.4)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(37, 211, 102, 0.3)'">
+                    <span style="font-size: 20px;">📲</span>
+                    Sí, enviar por WhatsApp
+                </button>
+                
+                <button onclick="cerrarModalWhatsApp()" style="
+                    background: transparent;
+                    color: #6c757d;
+                    border: 2px solid #dee2e6;
+                    padding: 15px 30px;
+                    border-radius: 30px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    transition: all 0.3s;
+                " onmouseover="this.style.borderColor='#adb5bd'; this.style.color='#495057'" 
+                   onmouseout="this.style.borderColor='#dee2e6'; this.style.color='#6c757d'">
+                    Tal vez después
+                </button>
+            </div>
+            
+            <p style="color: #888; font-size: 14px; margin-top: 20px; font-style: italic;">
+                No te preocupes, tu pedido ya está guardado 😊
+            </p>
+        </div>
+    `;
+    
+    // Guardar datos del pedido para uso posterior
+    window.currentOrderData = orderData;
+    
+    // Agregar estilos específicos para WhatsApp modal si no existen
+    if (!document.querySelector('#whatsapp-styles')) {
+        const whatsappStyles = document.createElement('style');
+        whatsappStyles.id = 'whatsapp-styles';
+        whatsappStyles.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            @keyframes slideInWhatsApp {
+                from { transform: translateY(-30px) scale(0.95); opacity: 0; }
+                to { transform: translateY(0) scale(1); opacity: 1; }
+            }
+            
+            .btn-whatsapp-send:active {
+                transform: translateY(0) scale(0.98) !important;
+            }
+        `;
+        document.head.appendChild(whatsappStyles);
+    }
+    
+    document.body.appendChild(whatsappModal);
+    
+    // Cerrar con clic fuera del modal
+    whatsappModal.addEventListener('click', (e) => {
+        if (e.target === whatsappModal) {
+            cerrarModalWhatsApp();
+        }
+    });
+    
+    // Cerrar con tecla Escape
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            cerrarModalWhatsApp();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}
+
+// ==================== FUNCIÓN PARA CERRAR MODAL DE WHATSAPP ====================
+function cerrarModalWhatsApp() {
+    const modal = document.querySelector('.whatsapp-modal');
+    if (modal) {
+        modal.style.animation = 'fadeIn 0.3s ease reverse';
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+}
+
+// ==================== FUNCIÓN PARA ENVIAR PEDIDO POR WHATSAPP ====================
+function enviarPedidoPorWhatsApp() {
+    console.log('Iniciando envío por WhatsApp...');
+    
+    // Obtener datos del pedido
+    const orderData = window.currentOrderData;
+    
+    if (!orderData) {
+        console.error('No hay datos del pedido disponibles');
+        alert('Error: No se pudieron recuperar los datos del pedido');
+        return;
+    }
+    
+    try {
+        // Crear mensaje estructurado para WhatsApp
+        let mensaje = `🛒 *NUEVO PEDIDO - ${WHATSAPP_CONFIG.businessName}*\n\n`;
+        
+        // Información del cliente
+        mensaje += `👤 *DATOS DEL CLIENTE:*\n`;
+        mensaje += `• Nombre: ${orderData.customer.name || 'No especificado'}\n`;
+        mensaje += `• Email: ${orderData.customer.email || 'No especificado'}\n`;
+        
+        // Obtener datos adicionales del formulario si están disponibles
+        const direccion = document.getElementById('direccion');
+        const telefono = document.getElementById('telefono');
+        const ciudad = document.getElementById('ciudad');
+        
+        if (telefono && telefono.value) {
+            mensaje += `• Teléfono: ${telefono.value}\n`;
+        }
+        if (direccion && direccion.value) {
+            mensaje += `• Dirección: ${direccion.value}\n`;
+        }
+        if (ciudad && ciudad.value) {
+            mensaje += `• Ciudad: ${ciudad.value}\n`;
+        }
+        
+        mensaje += `\n📦 *PRODUCTOS PEDIDOS:*\n`;
+        
+        // Lista detallada de productos
+        if (orderData.items && orderData.items.length > 0) {
+            orderData.items.forEach((item, index) => {
+                mensaje += `\n${index + 1}. *${item.name || 'Producto'}*\n`;
+                mensaje += `   • Cantidad: ${item.cantidad || 1}\n`;
+                mensaje += `   • Precio unitario: $${(item.precio || 0).toFixed(2)}\n`;
+                mensaje += `   • Subtotal: $${((item.precio || 0) * (item.cantidad || 1)).toFixed(2)}`;
+            });
+        }
+        
+        mensaje += `\n\n💰 *RESUMEN FINAL:*\n`;
+        mensaje += `• Subtotal: $${(orderData.total || 0).toFixed(2)}\n`;
+        mensaje += `• *TOTAL: $${(orderData.total || 0).toFixed(2)}*\n`;
+        
+        // Método de pago si está disponible
+        const metodoPago = document.querySelector('input[name="metodoPago"]:checked');
+        if (metodoPago) {
+            const metodos = {
+                'tarjeta': 'Tarjeta de crédito/débito 💳',
+                'efectivo': 'Efectivo 💵',
+                'transferencia': 'Transferencia bancaria 🏦'
+            };
+            mensaje += `• Método de pago: ${metodos[metodoPago.value] || metodoPago.value}\n`;
+        }
+        
+        mensaje += `\n⏰ *Fecha del pedido:* ${new Date().toLocaleString('es-AR', {
+            day: '2-digit',
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}\n`;
+        
+        mensaje += `\n✅ *Pedido listo para confirmar*\n`;
+        mensaje += `Por favor confirme la disponibilidad y tiempo de entrega.`;
+        
+        // Codificar mensaje para URL
+        const mensajeCodificado = encodeURIComponent(mensaje);
+        
+        // Crear URL de WhatsApp
+        const urlWhatsApp = `https://wa.me/${WHATSAPP_CONFIG.number}?text=${mensajeCodificado}`;
+        
+        console.log('URL de WhatsApp generada:', urlWhatsApp);
+        
+        // Mostrar mensaje de confirmación antes de abrir WhatsApp
+        mostrarMensajeEnvio();
+        
+        // Abrir WhatsApp después de un breve delay
+        setTimeout(() => {
+            window.open(urlWhatsApp, '_blank');
+            cerrarModalWhatsApp();
+        }, 1500);
+        
+        console.log('Mensaje enviado a WhatsApp:', mensaje);
+        
+    } catch (error) {
+        console.error('Error al enviar por WhatsApp:', error);
+        alert('Error al procesar el pedido. Por favor, inténtalo de nuevo.');
+    }
+}
+
+// ==================== FUNCIÓN PARA MOSTRAR MENSAJE DE ENVÍO ====================
+function mostrarMensajeEnvio() {
+    // Remover mensaje existente si hay alguno
+    const existingMessage = document.querySelector('.mensaje-envio');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+
+    // Crear mensaje de confirmación de envío
+    const mensajeEnvio = document.createElement('div');
+    mensajeEnvio.className = 'mensaje-envio';
+    mensajeEnvio.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        z-index: 10002;
+        box-shadow: 0 5px 20px rgba(37, 211, 102, 0.4);
+        animation: slideInRight 0.5s ease;
+        max-width: 300px;
+    `;
+    
+    mensajeEnvio.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 24px;">📱</span>
+            <div>
+                <div style="font-weight: bold; margin-bottom: 5px;">¡Abriendo WhatsApp!</div>
+                <div style="font-size: 14px; opacity: 0.9;">Tu pedido se está enviando...</div>
+            </div>
+        </div>
+    `;
+    
+    // Agregar animación si no existe
+    if (!document.querySelector('#slide-animation')) {
+        const animationStyle = document.createElement('style');
+        animationStyle.id = 'slide-animation';
+        animationStyle.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(animationStyle);
+    }
+    
+    document.body.appendChild(mensajeEnvio);
+    
+    // Remover después de 4 segundos
+    setTimeout(() => {
+        if (mensajeEnvio && mensajeEnvio.parentNode) {
+            mensajeEnvio.style.animation = 'slideInRight 0.5s ease reverse';
+            setTimeout(() => {
+                if (mensajeEnvio.parentNode) {
+                    mensajeEnvio.remove();
+                }
+            }, 500);
+        }
+    }, 4000);
+}
+
+// ==================== FUNCIONES DE UTILIDAD ADICIONALES ====================
+
+// Función para contacto directo por WhatsApp (para otros botones)
+function contactarPorWhatsApp(mensaje = "¡Hola! Me interesa conocer más sobre sus productos en FreshMarket.") {
+    try {
+        const mensajeCodificado = encodeURIComponent(mensaje);
+        const urlWhatsApp = `https://wa.me/${WHATSAPP_CONFIG.number}?text=${mensajeCodificado}`;
+        window.open(urlWhatsApp, '_blank');
+    } catch (error) {
+        console.error('Error al contactar por WhatsApp:', error);
+        alert('Error al abrir WhatsApp. Verifica tu conexión e inténtalo de nuevo.');
+    }
+}
+
+// Función para crear botón flotante de WhatsApp (opcional)
+function crearBotonFlotanteWhatsApp() {
+    // Verificar si ya existe
+    if (document.getElementById('whatsapp-float')) {
+        return;
+    }
+    
+    const botonFlotante = document.createElement('div');
+    botonFlotante.id = 'whatsapp-float';
+    botonFlotante.innerHTML = `
+        <a href="#" onclick="contactarPorWhatsApp(); return false;" style="
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border-radius: 50px;
+            padding: 15px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            <span style="font-size: 28px;">💬</span>
+            <span style="font-weight: bold;">Chat</span>
+        </a>
+    `;
+    
+    // Agregar animación de pulso si no existe
+    if (!document.querySelector('#pulse-style')) {
+        const pulseStyle = document.createElement('style');
+        pulseStyle.id = 'pulse-style';
+        pulseStyle.textContent = `
+            @keyframes pulse {
+                0% { box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); }
+                50% { box-shadow: 0 4px 25px rgba(37, 211, 102, 0.6); }
+                100% { box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); }
+            }
+        `;
+        document.head.appendChild(pulseStyle);
+    }
+    
+    document.body.appendChild(botonFlotante);
+}
+
+// ==================== INICIALIZACIÓN ====================
+// Ejecutar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('WhatsApp integration cargada correctamente');
+    console.log('Configuración WhatsApp:', WHATSAPP_CONFIG);
+    
+    // Crear botón flotante (opcional - descomenta la siguiente línea si lo quieres)
+    // crearBotonFlotanteWhatsApp();
+});
+
+// Asegurar que las funciones estén disponibles globalmente
+window.onPaymentSuccess = onPaymentSuccess;
+window.enviarPedidoPorWhatsApp = enviarPedidoPorWhatsApp;
+window.cerrarModalWhatsApp = cerrarModalWhatsApp;
+window.cerrarNotificacionExito = cerrarNotificacionExito;
+window.contactarPorWhatsApp = contactarPorWhatsApp;
+window.WHATSAPP_CONFIG = WHATSAPP_CONFIG;
+
+// Función de prueba para verificar que todo funciona
+function testWhatsAppIntegration() {
+    console.log('Probando integración de WhatsApp...');
+    console.log('Configuración disponible:', WHATSAPP_CONFIG);
+    
+    // Datos de prueba
+    const testOrderData = {
+        customer: {
+            name: "Juan Pérez",
+            email: "juan@example.com"
+        },
+        items: [
+            {
+                name: "Producto de prueba",
+                cantidad: 2,
+                precio: 15.50
+            }
+        ],
+        total: 31.00
+    };
+    
+    onPaymentSuccess(testOrderData);
+}
+
+// Hacer disponible la función de prueba globalmente
+window.testWhatsAppIntegration = testWhatsAppIntegration;
